@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teacher Overview — Smart Task Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080b14;
+      --surface: #0e1320;
+      --surface2: #141925;
+      --border: rgba(255,255,255,0.06);
+      --accent: #4F8EF7;
+      --accent2: #A78BFA;
+      --teal: #34D399;
+      --danger: #F87171;
+      --warning: #FBBF24;
+      --text: #E8EDF5;
+      --muted: #5a6480;
+      --font-head: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── NAVBAR ── */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 58px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-head); font-weight: 700; font-size: 15px; color: var(--text); text-decoration: none; }
+    .nav-logo { width: 30px; height: 30px; background: var(--accent); border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 6px; }
+    .nav-logo span { background: rgba(255,255,255,0.9); border-radius: 2px; }
+    .nav-logo span:nth-child(2) { opacity: 0.5; }
+    .nav-logo span:nth-child(3) { opacity: 0.5; }
+    .nav-logo span:nth-child(4) { opacity: 0.25; }
+    .nav-links { display: flex; align-items: center; gap: 2px; }
+    .nav-link { padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; transition: all 0.15s; }
+    .nav-link:hover { background: var(--surface2); color: var(--text); }
+    .nav-link.active { background: rgba(79,142,247,0.12); color: var(--accent); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-user { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+    .nav-avatar { width: 30px; height: 30px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; }
+    .nav-logout { padding: 5px 12px; border-radius: 7px; border: 1px solid var(--border); color: var(--muted); font-size: 12px; text-decoration: none; transition: all 0.15s; }
+    .nav-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* ── LAYOUT ── */
+    .page { padding: 2rem; max-width: 1300px; margin: 0 auto; }
+
+    /* ── HEADER ── */
+    .page-header { margin-bottom: 2rem; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .page-title { font-family: var(--font-head); font-size: 28px; font-weight: 700; }
+    .page-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .header-badge { background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.25); color: var(--accent); font-size: 12px; font-weight: 500; padding: 5px 14px; border-radius: 99px; font-family: var(--font-mono); }
+    .btn-report { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 8px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; border: none; font-family: var(--font-body); transition: all 0.15s; }
+    .btn-report:hover { opacity: 0.85; }
+
+    /* ── STATS ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.15s; }
+    .stat-card:hover { border-color: rgba(79,142,247,0.25); transform: translateY(-2px); }
+    .stat-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:40px; background: linear-gradient(to top, rgba(79,142,247,0.04), transparent); }
+    .stat-card.teal::after { background: linear-gradient(to top, rgba(52,211,153,0.05), transparent); }
+    .stat-card.danger::after { background: linear-gradient(to top, rgba(248,113,113,0.05), transparent); }
+    .stat-card.purple::after { background: linear-gradient(to top, rgba(167,139,250,0.05), transparent); }
+    .stat-label { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
+    .stat-value { font-family: var(--font-head); font-size: 38px; font-weight: 700; line-height: 1; }
+    .stat-value.blue { color: var(--accent); }
+    .stat-value.teal { color: var(--teal); }
+    .stat-value.danger { color: var(--danger); }
+    .stat-value.purple { color: var(--accent2); }
+    .stat-sub { font-size: 11px; color: var(--muted); margin-top: 8px; }
+
+    /* ── CARD ── */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.25rem; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px; }
+    .card-title { font-family: var(--font-head); font-size: 15px; font-weight: 600; }
+    .card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* ── TREND CHART ── */
+    .chart-wrap { position: relative; height: 260px; }
+    .chart-controls { display: flex; align-items: center; gap: 8px; }
+    select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 7px; font-size: 12px; font-family: var(--font-body); outline: none; cursor: pointer; }
+    select:focus { border-color: var(--accent); }
+
+    /* ── TEAM TABLE ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { padding: 8px 14px; text-align: left; font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none; transition: color 0.15s; }
+    thead th:hover { color: var(--accent); }
+    tbody td { padding: 13px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background 0.1s; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    tbody tr.atrisk td:first-child { border-left: 2px solid var(--danger); padding-left: 12px; }
+    tbody tr.ok td:first-child { border-left: 2px solid var(--teal); padding-left: 12px; }
+
+    /* ── EFFICIENCY BAR ── */
+    .eff-wrap { display: flex; align-items: center; gap: 8px; }
+    .eff-bar-bg { flex: 1; height: 5px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+    .eff-bar { height: 100%; border-radius: 99px; }
+    .eff-score { font-family: var(--font-mono); font-size: 12px; color: var(--muted); width: 28px; text-align: right; }
+
+    /* ── STATUS BADGE ── */
+    .badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 99px; }
+    .badge-risk { background: rgba(248,113,113,0.12); color: #FCA5A5; }
+    .badge-ok { background: rgba(52,211,153,0.1); color: var(--teal); }
+    .badge-mod { background: rgba(251,191,36,0.1); color: var(--warning); }
+    .badge-score { background: rgba(79,142,247,0.1); color: var(--accent); font-family: var(--font-mono); }
+
+    /* ── ALERTS PANEL ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+    .alert-list { display: flex; flex-direction: column; gap: 0; }
+    .alert-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .alert-item:last-child { border-bottom: none; }
+    .alert-icon { width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+    .alert-icon.danger { background: rgba(248,113,113,0.12); color: var(--danger); }
+    .alert-icon.warning { background: rgba(251,191,36,0.1); color: var(--warning); }
+    .alert-text { font-size: 13px; color: var(--text); line-height: 1.4; }
+    .alert-detail { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .empty { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
+
+    /* ── FADE IN ── */
+    .fade-in { animation: fi 0.4s ease both; }
+    @keyframes fi { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none} }
+    .fade-in:nth-child(1){animation-delay:.05s}.fade-in:nth-child(2){animation-delay:.1s}
+    .fade-in:nth-child(3){animation-delay:.15s}.fade-in:nth-child(4){animation-delay:.2s}
+
+    @media(max-width:900px){
+      .stats-grid{grid-template-columns:1fr 1fr;}
+      .two-col{grid-template-columns:1fr;}
+    }
+    @media(max-width:540px){
+      .stats-grid{grid-template-columns:1fr;}
+      .page{padding:1rem;}
+      .page-header{flex-direction:column;align-items:flex-start;}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand">
+    <div class="nav-logo"><span></span><span></span><span></span><span></span></div>
+    SmartTask AI
+  </a>
+  <div class="nav-links">
+    <a href="/teacher/dashboard" class="nav-link active">Overview</a>
+    <a href="/teacher/reports"   class="nav-link">Reports</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user">
+      <div class="nav-avatar">ST</div>
+      <span><%= locals.userName || 'Subject Teacher' %></span>
+    </div>
+    <a href="/logout" class="nav-logout">Logout</a>
+  </div>
+</nav>
+
+<%
+  const teams        = locals.teams || [];
+  const totalTasks   = teams.reduce((s,t) => s+(t.totalTasks||0), 0);
+  const totalDone    = teams.reduce((s,t) => s+(t.completed||0), 0);
+  const totalOverdue = teams.reduce((s,t) => s+(t.overdue||0), 0);
+  const overallRate  = totalTasks > 0 ? Math.round((totalDone/totalTasks)*100) : 0;
+  const atRisk       = teams.filter(t => t.totalTasks > 0 && (t.overdue/t.totalTasks) > 0.3);
+%>
+
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">Organization Overview</div>
+      <div class="page-sub"><%= new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) %></div>
+    </div>
+    <div class="header-right">
+      <div class="header-badge">Subject Teacher</div>
+      <button class="btn-report" onclick="window.print()">Print Report</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card fade-in">
+      <div class="stat-label">Total teams</div>
+      <div class="stat-value blue"><%= teams.length %></div>
+      <div class="stat-sub">active this semester</div>
+    </div>
+    <div class="stat-card teal fade-in">
+      <div class="stat-label">Overall completion</div>
+      <div class="stat-value teal"><%= overallRate %>%</div>
+      <div class="stat-sub"><%= totalDone %> of <%= totalTasks %> tasks done</div>
+    </div>
+    <div class="stat-card danger fade-in">
+      <div class="stat-label">Overdue tasks</div>
+      <div class="stat-value danger"><%= totalOverdue %></div>
+      <div class="stat-sub">across all teams</div>
+    </div>
+    <div class="stat-card purple fade-in">
+      <div class="stat-label">Total tasks</div>
+      <div class="stat-value purple"><%= totalTasks %></div>
+      <div class="stat-sub">org-wide</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Productivity trends</div>
+        <div class="card-sub">Completion rate over time per team</div>
+      </div>
+      <div class="chart-controls">
+        <select id="teamFilter" onchange="filterTeam(this.value)">
+          <option value="all">All teams</option>
+          <% teams.forEach(t => { %>
+            <option value="<%= t.name %>"><%= t.name %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Team performance</div>
+        <div class="card-sub">Click column headers to sort</div>
+      </div>
+      <% if (atRisk.length > 0) { %>
+        <span class="badge badge-risk"><%= atRisk.length %> team<%= atRisk.length > 1 ? 's' : '' %> at risk</span>
+      <% } else { %>
+        <span class="badge badge-ok">All teams healthy</span>
+      <% } %>
+    </div>
+    <div class="table-wrap">
+      <table id="perfTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">Team</th>
+            <th onclick="sortTable(1)">Total</th>
+            <th onclick="sortTable(2)">Completed</th>
+            <th onclick="sortTable(3)">Overdue</th>
+            <th onclick="sortTable(4)">Efficiency</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (teams.length === 0) { %>
+            <tr><td colspan="6" class="empty">No team data available</td></tr>
+          <% } %>
+          <% teams.forEach(team => {
+            const rate = team.totalTasks > 0 ? Math.round((team.completed/team.totalTasks)*100) : 0;
+            const overduePct = team.totalTasks > 0 ? Math.round((team.overdue/team.totalTasks)*100) : 0;
+            const eff = Math.max(0, Math.min(100, Math.round(100 - overduePct*1.5 + rate*0.5)));
+            const isBad = overduePct > 30;
+            const effColor = eff >= 70 ? 'var(--teal)' : eff >= 40 ? 'var(--warning)' : 'var(--danger)';
+          %>
+          <tr class="<%= isBad ? 'atrisk' : 'ok' %>">
+            <td style="font-weight:600;"><%= team.name %></td>
+            <td style="font-family:var(--font-mono);color:var(--muted);"><%= team.totalTasks %></td>
+            <td><span style="font-family:var(--font-mono);color:var(--teal);"><%= team.completed %></span> <span style="font-size:11px;color:var(--muted);">(<%= rate %>%)</span></td>
+            <td style="color:<%= team.overdue > 0 ? 'var(--danger)' : 'var(--muted)' %>;font-family:var(--font-mono);font-weight:<%= team.overdue > 0 ? '600' : '400' %>"><%= team.overdue %></td>
+            <td>
+              <div class="eff-wrap">
+                <div class="eff-bar-bg">
+                  <div class="eff-bar" style="width:<%= eff %>%;background:<%= effColor %>;"></div>
+                </div>
+                <div class="eff-score"><%= eff %></div>
+              </div>
+            </td>
+            <td>
+              <% if (isBad) { %><span class="badge badge-risk">At risk</span>
+              <% } else if (rate >= 70) { %><span class="badge badge-ok">On track</span>
+              <% } else { %><span class="badge badge-mod">Moderate</span><% } %>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card" style="margin-bottom:0;">
+      <div class="card-header">
+        <div class="card-title">Inefficiency alerts</div>
+      </div>
+      <% if (atRisk.length === 0) { %>
+        <div class="empty">No inefficiencies detected</div>
+      <% } else { %>
+      <div class="alert-list">
+        <% atRisk.forEach(t => {
+          const pct = Math.round((t.overdue/t.totalTasks)*100);
+        %>
+        <div class="alert-item">
+          <div class="alert-icon danger">!</div>
+          <div>
+            <div class="alert-text"><%= t.name %></div>
+            <div class="alert-detail"><%= pct %>% overdue rate — <%= t.overdue %> tasks past deadline</div>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+      <% } %>
+    </div>
+
+    <div class="card" style="margin-bottom:0;">
+      <div class="card-header">
+        <div class="card-title">Quick actions</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button class="btn-report" onclick="window.print()" style="justify-content:center;">Print full report</button>
+        <a href="/teacher/reports" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);color:var(--muted);font-size:13px;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">View detailed reports</a>
+        <a href="/teacher/teams" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);color:var(--muted);font-size:13px;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Manage teams</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const trendData = <%- JSON.stringify(locals.trendData || {
+  labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+  datasets: [{ label: 'Team A', data: [0,0,0,0,0,0,0] }]
+}) %>;
+
+Chart.defaults.color = '#5a6480';
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+const colors = ['#4F8EF7','#34D399','#FBBF24','#F87171','#A78BFA'];
+const chart = new Chart(document.getElementById('trendChart'), {
+  type: 'line',
+  data: {
+    labels: trendData.labels,
+    datasets: (trendData.datasets || []).map((ds, i) => ({
+      label: ds.label,
+      data: ds.data,
+      borderColor: colors[i % colors.length],
+      backgroundColor: 'transparent',
+      tension: 0.4, pointRadius: 4, borderWidth: 2,
+    }))
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 16, font: { size: 12 } } } },
+    scales: {
+      y: { beginAtZero: true, max: 100, ticks: { callback: v => v+'%' }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } },
+      x: { grid: { display: false }, border: { display: false } }
+    }
+  }
+});
+
+function filterTeam(name) {
+  chart.data.datasets.forEach(ds => ds.hidden = name !== 'all' && ds.label !== name);
+  chart.update();
+}
+
+let sortDir = {};
+function sortTable(col) {
+  const table = document.getElementById('perfTable');
+  const tbody = table.querySelector('tbody');
+  const rows  = Array.from(tbody.querySelectorAll('tr'));
+  const asc   = sortDir[col] !== 'asc';
+  sortDir[col] = asc ? 'asc' : 'desc';
+  rows.sort((a, b) => {
+    const va = a.cells[col]?.textContent.trim() || '';
+    const vb = b.cells[col]?.textContent.trim() || '';
+    const na = parseFloat(va), nb = parseFloat(vb);
+    if (!isNaN(na) && !isNaN(nb)) return asc ? na - nb : nb - na;
+    return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+</script>
+</body>
+</html>

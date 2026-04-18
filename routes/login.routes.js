@@ -6,9 +6,6 @@ const Manager = require("../models/manager.model (1)");
 const User    = require("../models/user.model");
 const Teacher = require("../models/teacher.model");
 
-// ─────────────────────────────────────────
-// GET /Login
-// ─────────────────────────────────────────
 route.get("/Login", (req, res) => {
   if (req.session && req.session.userId) {
     return redirectByRole(res, req.session.role);
