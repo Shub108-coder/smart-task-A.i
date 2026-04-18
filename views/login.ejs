@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body>
-    <form action="/signin">
-        <input type="email"><br>
-        <input type="password">
-        <button>Submit</button>
+<body class="h-[100vh] w-[100vw] bg-[#2B54D0] flex justify-center items-center">
+    <form action="/signin" class="bg-white gap-10 rounded-lg flex-col flex justify-center items-center w-[27rem] h-[70vh]">
+        <h1 class="text-5xl font-bold">Log in</h1>
+        <div class="flex justify-center items-center flex-col w-[100%] gap-2">
+            <input placeholder="Email" class="border-solid border-[#5d5d5d] rounded-lg border-1 p-[10px] w-[80%]" type="email">
+            <input placeholder="Password" class="border-solid border-[#5d5d5d] rounded-lg border-1 p-[10px] w-[80%]" type="password">
+        </div>
+        <button class="bg-blue-500 text-white font-bold p-[13px] w-[10rem] text-xl rounded-lg">Log in</button>
     </form>
 </body>
 </html>
