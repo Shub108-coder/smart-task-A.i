@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= locals.title || 'Notification' %> — Smart Task Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #F4F3FA;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .alert-card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e5e4f0;
+      padding: 2.5rem 2rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(83,74,183,0.1);
+    }
+    .alert-icon {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-size: 26px;
+    }
+    .alert-icon.success { background: #E1F5EE; }
+    .alert-icon.error   { background: #FCEBEB; }
+    .alert-icon.warning { background: #FAEEDA; }
+    .alert-icon.info    { background: #EEEDFE; }
+
+    .alert-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .alert-title.success { color: #0F6E56; }
+    .alert-title.error   { color: #A32D2D; }
+    .alert-title.warning { color: #854F0B; }
+    .alert-title.info    { color: #3C3489; }
+
+    .alert-message {
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .alert-details {
+      background: #F4F3FA;
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-align: left;
+      margin-bottom: 1.5rem;
+      font-size: 13px;
+      color: #444;
+      font-family: 'DM Mono', monospace;
+    }
+    .alert-details p { margin-bottom: 4px; }
+    .alert-details p:last-child { margin-bottom: 0; }
+    .alert-details strong { color: #534AB7; }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-primary   { background: #534AB7; color: #fff; }
+    .btn-primary:hover { background: #3C3489; }
+    .btn-success   { background: #1D9E75; color: #fff; }
+    .btn-success:hover { background: #0F6E56; }
+    .btn-danger    { background: #E24B4A; color: #fff; }
+    .btn-danger:hover { background: #A32D2D; }
+    .btn-outline   { background: transparent; color: #534AB7; border: 1px solid #CECBF6; }
+    .btn-outline:hover { background: #EEEDFE; }
+
+    .btn-group { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+    .progress-bar {
+      height: 3px;
+      background: #CECBF6;
+      border-radius: 99px;
+      margin-top: 1.5rem;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: #534AB7;
+      border-radius: 99px;
+      animation: drain linear forwards;
+    }
+    @keyframes drain { from { width: 100%; } to { width: 0%; } }
+  </style>
+</head>
+<body>
+  <div class="alert-card">
+
+    <div class="alert-icon <%= locals.type || 'info' %>">
+      <% if ((locals.type || 'info') === 'success') { %>✓
+      <% } else if (locals.type === 'error') { %>✕
+      <% } else if (locals.type === 'warning') { %>⚠
+      <% } else { %>ℹ<% } %>
+    </div>
+
+    <div class="alert-title <%= locals.type || 'info' %>"><%= locals.title || 'Notice' %></div>
+    <div class="alert-message"><%= locals.message || '' %></div>
+
+    <% if (locals.details && locals.details.length > 0) { %>
+    <div class="alert-details">
+      <% locals.details.forEach(d => { %>
+        <p><strong><%= d.label %>:</strong> <%= d.value %></p>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <div class="btn-group">
+      <% if (locals.buttons) { %>
+        <% locals.buttons.forEach(btn => { %>
+          <a href="<%= btn.href %>" class="btn <%= btn.class || 'btn-primary' %>"><%= btn.label %></a>
+        <% }) %>
+      <% } else { %>
+        <a href="/Login" class="btn btn-primary">Go to Login</a>
+      <% } %>
+    </div>
+
+    <% if (locals.autoRedirect) { %>
+    <div class="progress-bar">
+      <div class="progress-fill" style="animation-duration: <%= locals.autoRedirect.seconds %>s;"></div>
+    </div>
+    <script>
+      setTimeout(() => window.location.href = "<%= locals.autoRedirect.href %>", <%= locals.autoRedirect.seconds * 1000 %>);
+    </script>
+    <% } %>
+
+  </div>
+</body>
+</html>
