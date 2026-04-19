@@ -77,7 +77,7 @@
                 <tbody>
                   <tr>
                     <td class="bold accent">Frontend</td>
-                    <td class="mono">React + Vite</td>
+                    <td class="mono">EJS pages</td>
                     <td>SaaS-style dashboard with Chart.js analytics</td>
                   </tr>
                   <tr>
@@ -94,11 +94,3 @@
             </table>
         </div>
     </div>
-    <h1>Stack Used</h1>
-    <ul>
-        <li>MongoDB</li>
-        <li>Node.js</li>
-        <li>Express.js</li>
-        <li>EJS pages</li>
-    </ul>
-</section>
