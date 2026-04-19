@@ -94,4 +94,11 @@
             </table>
         </div>
     </div>
+    <h1>Stack Used</h1>
+    <ul>
+        <li>MongoDB</li>
+        <li>Node.js</li>
+        <li>Express.js</li>
+        <li>EJS pages</li>
+    </ul>
 </section>
